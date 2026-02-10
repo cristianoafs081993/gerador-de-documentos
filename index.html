@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Gerador IFRN 6.2 - Despacho & CDO</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #e9ecef;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .nav-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            background: #6c757d;
+            color: white;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+
+        .nav-btn.active {
+            background: #28a745;
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+        }
+
+        .form-container {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 40px;
+            border-top: 5px solid #28a745;
+            display: none;
+        }
+
+        .form-container.active {
+            display: block;
+        }
+
+        h2 {
+            color: #155724;
+            border-bottom: 2px solid #28a745;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+            font-size: 13px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .row>div {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            padding: 15px;
+            flex: 1;
+            min-width: 140px;
+            color: white;
+        }
+
+        .btn-gerar {
+            background-color: #28a745;
+        }
+
+        .btn-copy {
+            background-color: #f39c12;
+            display: none;
+        }
+
+        .btn-reset {
+            background-color: #dc3545;
+        }
+
+        .btn-clonar {
+            background-color: #007bff;
+        }
+
+        .natureza-item {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+        }
+
+        .natureza-item:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+        }
+
+        .natureza-info {
+            flex: 1;
+        }
+
+        .natureza-desc {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .natureza-valor {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .btn-remover {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn-remover:hover {
+            background: #c82333;
+        }
+
+        .total-naturezas {
+            background: #e7f5ff;
+            border: 2px solid #339af0;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #1864ab;
+            text-align: right;
+            font-size: 16px;
+        }
+
+        #documento-preview {
+            background: white;
+            width: 21cm;
+            min-height: 20cm;
+            padding: 2.5cm;
+            margin: auto;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        @media print {
+            body {
+                background: none;
+                padding: 0;
+            }
+
+            .nav-container,
+            .form-container,
+            .btn-group {
+                display: none !important;
+            }
+
+            #documento-preview {
+                display: block !important;
+                box-shadow: none;
+                width: 100%;
+                padding: 1cm;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="nav-container">
+        <button id="btn-nav-despacho" class="nav-btn active" onclick="switchTab('despacho')">GERADOR DE
+            DESPACHO</button>
+        <button id="btn-nav-cdo" class="nav-btn" onclick="switchTab('cdo')">GERADOR DE CDO</button>
+    </div>
+
+    <div id="container-despacho" class="form-container active">
+        <h2>Gerador de Despacho 4.5</h2>
+        <div class="form-group">
+            <label>Finalidade do Despacho:</label>
+            <select id="finalidade" onchange="alternarCampos()">
+                <option value="contrato">Contrato ou Aquisição Comum</option>
+                <option value="projeto">Projeto de Pesquisa / Extensão (Alunos)</option>
+            </select>
+        </div>
+        <div id="campo-projeto" class="form-group" style="display:none;">
+            <label>Nome do Projeto:</label>
+            <textarea id="nomeProjeto" rows="2"></textarea>
+        </div>
+        <div id="campo-contrato">
+            <div class="form-group">
+                <label>Tipo:</label>
+                <select id="tipo">
+                    <option value="dos serviços de">Serviço</option>
+                    <option value="da aquisição de">Aquisição</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Descrição Detalhada:</label>
+                <textarea id="descricao" rows="2"></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label id="label-favorecido">Favorecido:</label>
+            <input type="text" id="favorecido">
+        </div>
+        <div class="row">
+            <div class="form-group"><label>Processo nº:</label><input type="text" id="processo"></div>
+            <div class="form-group"><label>Valor (R$):</label><input type="text" id="valor"></div>
+        </div>
+        <div class="form-group">
+            <label>Número do Empenho:</label>
+            <input type="text" id="empenho">
+        </div>
+        <div class="btn-group">
+            <button class="action-btn btn-gerar" onclick="gerarDespacho()">GERAR DESPACHO</button>
+            <button id="btnCopyDespacho" class="action-btn btn-copy"
+                onclick="copiarTexto('conteudo-despacho', this)">COPIAR TEXTO</button>
+            <button class="action-btn btn-reset" onclick="window.location.reload()">LIMPAR</button>
+            <button class="action-btn btn-clonar"
+                onclick="window.open('https://suap.ifrn.edu.br/documento_eletronico/clonar_documento/1019165/', '_blank')">CLONAR
+                (SUAP)</button>
+        </div>
+    </div>
+
+    <div id="container-cdo" class="form-container">
+        <h2>Certificado de Dotação Orçamentária</h2>
+        <div class="row">
+            <div class="form-group"><label>Unidade Administrativa:</label><input type="text" id="cdo-unidade"
+                    value="DG/CN - DIREÇÃO-GERAL DO CAMPUS CURRAIS NOVOS"></div>
+            <div class="form-group"><label>Processo nº:</label><input type="text" id="cdo-proc-topo"
+                    placeholder="23035.XXXXXX/2026-XX"></div>
+        </div>
+        <div class="row">
+            <div class="form-group"><label>Macroprocesso:</label>
+                <select id="cdo-macro" onchange="atualizarProcessos()">
+                    <option value="">Selecione...</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Processo (Descrição):</label>
+                <select id="cdo-proc-desc">
+                    <option value="">Selecione o macroprocesso primeiro</option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group"><label>Gerido por:</label><input type="text" id="cdo-setor"
+                    value="PROAD - PRÓ-REITORIA DE ADMINISTRAÇÃO"></div>
+            <div class="form-group"><label>Ano Atividades:</label><input type="text" id="cdo-ano" value="2026"></div>
+        </div>
+        <div class="form-group"><label>Finalidade:</label><input type="text" id="cdo-finalidade">
+        </div>
+
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
+            <div class="row">
+                <div class="form-group"><label>UG / UGR:</label><input type="text" id="cdo-ug" value="158366/151606">
+                </div>
+                <div class="form-group"><label>Origem Recurso SUAP:</label><input type="text" id="cdo-origem"></div>
+            </div>
+            <div class="row">
+                <div class="form-group"><label>PTRES:</label><input type="text" id="cdo-ptres"></div>
+                <div class="form-group"><label>PI:</label><input type="text" id="cdo-pi"></div>
+            </div>
+            <div class="row">
+                <div class="form-group"><label>GND:</label><input type="text" id="cdo-gnd"
+                        value="3 - Outras Despesas Correntes"></div>
+                <div class="form-group"><label>Fonte:</label><input type="text" id="cdo-fonte" value="1000000000"></div>
+            </div>
+
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #ddd;">
+                <h3 style="margin-top: 0; color: #155724; font-size: 16px;">Naturezas de Despesa</h3>
+                <div class="row">
+                    <div class="form-group" style="flex: 2;">
+                        <label>Natureza de Despesa (Ex: 339034 - DIARIAS):</label>
+                        <input type="text" id="cdo-nat-desc-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Valor (R$):</label>
+                        <input type="text" id="cdo-nat-valor-input" placeholder="0.00">
+                    </div>
+                </div>
+                <button type="button" class="action-btn"
+                    style="background-color: #17a2b8; width: 100%; margin-bottom: 15px;" onclick="adicionarNatureza()">+
+                    ADICIONAR NATUREZA DE DESPESA</button>
+
+                <div id="lista-naturezas" style="margin-top: 15px;"></div>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="action-btn btn-gerar" onclick="gerarCDO()">GERAR CDO</button>
+            <button id="btnCopyCDO" class="action-btn btn-copy" onclick="copiarTexto('conteudo-cdo', this)">COPIAR
+                CDO</button>
+            <button class="action-btn btn-reset" onclick="window.location.reload()">LIMPAR</button>
+            <button class="action-btn" style="background-color: #6f42c1;"
+                onclick="window.open('https://suap.ifrn.edu.br/documento_eletronico/clonar_documento/1026807/', '_blank')">CLONAR
+                CDO (SUAP)</button>
+        </div>
+    </div>
+
+    <div id="documento-preview">
+        <div id="conteudo-despacho"
+            style="display:none; font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5; text-align: justify; color: black;">
+            <div>À Coordenação de Finanças e Contratos do <i>Campus</i> Currais Novos</div>
+            <div style="font-weight: bold; margin-top: 30px;">Assunto: Autorização para Liquidação da Despesa</div>
+            <div id="texto-dinamico" style="text-indent: 2.5cm; margin-top: 30px; margin-bottom: 25px;"></div>
+            <div id="lista-itens"></div>
+            <div style="margin-top: 25px;">Na sequência, encaminhe-se o processo à Direção-Geral para análise e
+                posterior autorização do pagamento, em conformidade com o cronograma e a disponibilidade orçamentária
+                desta unidade.
+            </div>
+            <div style="margin-top: 40px;">Atenciosamente,</div>
+        </div>
+
+        <div id="conteudo-cdo"
+            style="display:none; font-family: 'Times New Roman', Times, serif; font-size: 11pt; color: black;"></div>
+    </div>
+
+    <script>
+        // ARRAY PARA ARMAZENAR NATUREZAS DE DESPESA
+        let naturezasDespesa = [];
+
+        // ADICIONAR NATUREZA DE DESPESA
+        function adicionarNatureza() {
+            const descInput = document.getElementById('cdo-nat-desc-input');
+            const valorInput = document.getElementById('cdo-nat-valor-input');
+
+            const desc = descInput.value.trim();
+            const valor = valorInput.value.trim();
+
+            if (!desc || !valor) {
+                alert('Por favor, preencha a descrição e o valor da natureza de despesa.');
+                return;
+            }
+
+            const valorNum = parseFloat(valor.replace(',', '.'));
+            if (isNaN(valorNum) || valorNum <= 0) {
+                alert('Por favor, insira um valor válido.');
+                return;
+            }
+
+            naturezasDespesa.push({ descricao: desc, valor: valorNum });
+
+            descInput.value = '';
+            valorInput.value = '';
+
+            atualizarListaNaturezas();
+        }
+
+        // REMOVER NATUREZA DE DESPESA
+        function removerNatureza(index) {
+            naturezasDespesa.splice(index, 1);
+            atualizarListaNaturezas();
+        }
+
+        // ATUALIZAR VISUALIZAÇÃO DA LISTA DE NATUREZAS
+        function atualizarListaNaturezas() {
+            const lista = document.getElementById('lista-naturezas');
+
+            if (naturezasDespesa.length === 0) {
+                lista.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">Nenhuma natureza de despesa adicionada ainda.</p>';
+                return;
+            }
+
+            let html = '';
+            naturezasDespesa.forEach((nat, index) => {
+                html += `
+                    <div class="natureza-item">
+                        <div class="natureza-info">
+                            <div class="natureza-desc">${nat.descricao}</div>
+                            <div class="natureza-valor">R$ ${formatarMoeda(nat.valor)}</div>
+                        </div>
+                        <button class="btn-remover" onclick="removerNatureza(${index})">✕ REMOVER</button>
+                    </div>
+                `;
+            });
+
+            const total = calcularTotal();
+            html += `<div class="total-naturezas">TOTAL: R$ ${formatarMoeda(total)}</div>`;
+
+            lista.innerHTML = html;
+        }
+
+        // CALCULAR TOTAL
+        function calcularTotal() {
+            return naturezasDespesa.reduce((sum, nat) => sum + nat.valor, 0);
+        }
+
+        // FORMATAR VALOR EM MOEDA
+        function formatarMoeda(valor) {
+            return valor.toFixed(2).replace('.', ',');
+        }
+
+        // DADOS DE MACROPROCESSO E PROCESSOS
+        const macroprocessoData = {
+            "AD - Administração": [
+                "8 - Orçamento",
+                "9 - Contabilidade e Finanças",
+                "10 - Compras e Licitações",
+                "11 - Contratos",
+                "12 - Material",
+                "13 - Patrimônio",
+                "5 - Contratos"
+            ],
+            "AE - Atividades Estudantis": [
+                "1 - Política de Atividades Estudantis",
+                "2 - Serviço Social",
+                "3 - Saúde Estudantil",
+                "4 - Psicologia Escolar",
+                "5 - Alimentação e Nutrição",
+                "Serviço Social",
+                "Programas e Projetos de Protagonismo Estudantil",
+                "Saúde Estudantil",
+                "Psicologia Escolar",
+                "Alimentação e Nutrição"
+            ],
+            "CI - Comunicação Institucional": [
+                "13 - Apoio a Eventos Institucionais"
+            ],
+            "EN - Ensino": [
+                "Política de Ensino - Política de Ensino",
+                "Política de Ensino - Planejamento do Ensino",
+                "Política de Ensino - Corpo Docente e Técnico do Ensino",
+                "Política de Ensino - Representação e Divulgação Institucional",
+                "Supervisão Técnica do Ensino - Supervisão Técnica do Ensino",
+                "Supervisão Técnica do Ensino - Monitoramento do Ensino",
+                "Supervisão Técnica do Ensino - Informações Institucionais do Ensino",
+                "Supervisão Técnica do Ensino - Legislação Educacional",
+                "Gestão Pedagógica e Desenvolvimento Curricular - Gestão Pedagógica e Desenvolvimento Curricular",
+                "Gestão Pedagógica e Desenvolvimento Curricular - Criação e Adequação de Cursos",
+                "Gestão Pedagógica e Desenvolvimento Curricular - Acompanhamento do Trabalho Pedagógico",
+                "Gestão Pedagógica e Desenvolvimento Curricular - EJA integrada à EPT",
+                "Gestão Pedagógica e Desenvolvimento Curricular - Permanência na Graduação",
+                "Gestão Pedagógica e Desenvolvimento Curricular - Atividades Acadêmico-Pedagógicas",
+                "Avaliação e Regulação do Ensino - Avaliação e Regulação do Ensino",
+                "Avaliação e Regulação do Ensino - Procuração e Interlocução Institucional",
+                "Avaliação e Regulação do Ensino - Monitoramento institucional e de cursos",
+                "Avaliação e Regulação do Ensino - Autorização de Funcionamento de Cursos",
+                "Avaliação e Regulação do Ensino - Avaliações e Exames Educacionais Externos",
+                "Avaliação e Regulação do Ensino - Revalidação de Diplomas",
+                "Educação e Interseccionalidades em Direitos Humanos - Educação e Interseccionalidades em Direitos Humanos",
+                "Educação e Interseccionalidades em Direitos Humanos - Educação Especial Inclusiva",
+                "Educação e Interseccionalidades em Direitos Humanos - Educação para as Relações Étnico-Raciais",
+                "Educação e Interseccionalidades em Direitos Humanos - Educação em Gênero e Diversidades",
+                "Tecnologias Educacionais e Educação a Distância - Tecnologias Educacionais e Educação a Distância",
+                "Tecnologias Educacionais e Educação a Distância - Programas de Educação a Distância e Ensino Híbrido",
+                "Tecnologias Educacionais e Educação a Distância - Recursos e Tecnologias Educacionais",
+                "Administração Acadêmica - Administração Acadêmica",
+                "Administração Acadêmica - Sistemas de Administração Acadêmica",
+                "Administração Acadêmica - Rotinas e Processos Acadêmicos",
+                "Administração Acadêmica - Auditorias e Censos Educacionais",
+                "Acesso Discente - Acesso Discente",
+                "Recursos de Informação e Bibliotecas - Recursos de Informação e Bibliotecas",
+                "Recursos de Informação e Bibliotecas - Sistema  Integrado de Bibliotecas",
+                "Recursos de Informação e Bibliotecas -  Repositórios Digitais",
+                "Recursos de Informação e Bibliotecas - Arquivos Institucionais",
+                "Programas e Projetos de Ensino",
+                "Apoio ao Ensino - Apoio ao Ensino",
+                "Apoio ao Ensino - Administração Escolar",
+                "Apoio ao Ensino  - Laboratórios Acadêmicos",
+                "Gestão de Esportes Estudantis"
+            ],
+            "EX - Extensão": [
+                "1 - Política de Extensão",
+                "2 - Interação com a Sociedade",
+                "3 - Relações com o Mundo do Trabalho",
+                "4 - Difusão e Cultura",
+                "5 - Gestão da Formação Inicial e Continuada"
+            ],
+            "GE - Gestão Estratégica e Desenvolvimento Institucional": [
+                "7 - Gestão da Unidade Agrícola/ Industrial-Escola"
+            ],
+            "GO - Governança": [
+                "19 - Suporte aos Colegiados de Apoio à Governança do IFRN"
+            ],
+            "GP - Gestão de Pessoas": [
+                "25 - Cadastro e pagamento de Pessoal",
+                "27 - Desenvolvimento de Pessoal",
+                "28 - Atenção à Saúde do Servidor"
+            ],
+            "IE - Infraestrutura": [
+                "14 - Gestão de Manutenção e Engenharia",
+                "15 -  Gestão de Serviços de Infraestrutura, Logística e Sustentabilidade"
+            ],
+            "IN - Internacionalização": [
+                "5 - Relações Internacionais"
+            ],
+            "PI - Pesquisa, Pós-Graduação e Inovação": [
+                "2 - Inovação Tecnológica"
+            ],
+            "TI - Tecnologia da Informação e Comunicação": [
+                "1 - Política de Tecnologia da Informação e Comunicação",
+                "2 - Governança de TIC",
+                "4 - Infraestrutura e Operações de TIC"
+            ]
+        };
+
+        // INICIALIZAR MACROPROCESSOS NO DROPDOWN
+        function inicializarMacroprocessos() {
+            const macroSelect = document.getElementById('cdo-macro');
+            const macros = Object.keys(macroprocessoData).sort();
+
+            macros.forEach(macro => {
+                const option = document.createElement('option');
+                option.value = macro;
+                option.textContent = macro;
+                macroSelect.appendChild(option);
+            });
+        }
+
+        // ATUALIZAR PROCESSOS BASEADO NO MACROPROCESSO SELECIONADO
+        function atualizarProcessos() {
+            const macroSelect = document.getElementById('cdo-macro');
+            const procSelect = document.getElementById('cdo-proc-desc');
+            const macroSelecionado = macroSelect.value;
+
+            // Limpar opções de processo
+            procSelect.innerHTML = '';
+
+            if (!macroSelecionado) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'Selecione o macroprocesso primeiro';
+                procSelect.appendChild(option);
+                return;
+            }
+
+            // Adicionar opção padrão
+            const optionDefault = document.createElement('option');
+            optionDefault.value = '';
+            optionDefault.textContent = 'Selecione...';
+            procSelect.appendChild(optionDefault);
+
+            // Obter processos únicos e ordenar
+            const processos = [...new Set(macroprocessoData[macroSelecionado])].sort();
+
+            processos.forEach(proc => {
+                const option = document.createElement('option');
+                option.value = proc;
+                option.textContent = proc;
+                procSelect.appendChild(option);
+            });
+        }
+
+        // Inicializar ao carregar a página
+        window.addEventListener('DOMContentLoaded', () => {
+            inicializarMacroprocessos();
+        });
+
+        // FUNÇÃO DE NAVEGAÇÃO
+        function switchTab(tab) {
+            document.getElementById('container-despacho').style.display = (tab === 'despacho') ? 'block' : 'none';
+            document.getElementById('container-cdo').style.display = (tab === 'cdo') ? 'block' : 'none';
+
+            document.getElementById('btn-nav-despacho').classList.toggle('active', tab === 'despacho');
+            document.getElementById('btn-nav-cdo').classList.toggle('active', tab === 'cdo');
+
+            document.getElementById('documento-preview').style.display = 'none';
+        }
+
+        // ALTERNAR CAMPOS DESPACHO
+        function alternarCampos() {
+            const isProjeto = document.getElementById('finalidade').value === 'projeto';
+            document.getElementById('campo-projeto').style.display = isProjeto ? 'block' : 'none';
+            document.getElementById('campo-contrato').style.display = isProjeto ? 'none' : 'block';
+            document.getElementById('label-favorecido').innerText = isProjeto ? "Aluno(s) Beneficiário(s):" : "Favorecido:";
+        }
+
+        // GERAR DESPACHO
+        function gerarDespacho() {
+            const finalidade = document.getElementById('finalidade').value;
+            const processo = document.getElementById('processo').value;
+            const valor = document.getElementById('valor').value;
+            const empenho = document.getElementById('empenho').value.toUpperCase();
+            const favorecido = document.getElementById('favorecido').value.toUpperCase();
+            const estiloRed = 'color: #d9534f; text-decoration: underline; font-weight: bold; text-transform: uppercase;';
+
+            let htmlTexto = "";
+            let htmlItens = "";
+
+            if (finalidade === 'contrato') {
+                const tipo = document.getElementById('tipo').value;
+                const desc = document.getElementById('descricao').value.toUpperCase();
+
+                // Define texto diferente para serviços e aquisição
+                let textoTipo = "";
+                if (tipo === "dos serviços de") {
+                    textoTipo = `e a prestação de serviços de <b>${desc}</b>`;
+                } else {
+                    textoTipo = `e a atestação da aquisição de <b>${desc}</b>`;
+                }
+
+                htmlTexto = `Considerando a plena regularidade dos documentos apresentados ${textoTipo} para este <i>campus</i> Currais Novos, (Processo nº <b>${processo}</b>), <b>AUTORIZO</b> a liquidação da despesa no valor de <b>R$ ${valor}</b> referente ao empenho <b>${empenho}</b>, em favor da empresa <b>${favorecido}</b>`;
+                htmlItens = ``;
+            } else {
+                htmlTexto = `Considerando a regularidade da documentação e a comprovação da execução das atividades pelos bolsistas do projeto <b>"${document.getElementById('nomeProjeto').value}"</b>, aprovado no Edital nº <b>10/2024-PROEX/IFRN</b> (Processo nº <b>${processo}</b>), <b>AUTORIZO</b> a liquidação da despesa no valor de <b>R$ ${valor}</b>.`;
+                htmlItens = `<div style="margin-bottom: 12px;"><b>Empenho(s):</b> <span style="${estiloRed}">${empenho}</span></div>
+                    <div style="margin-bottom: 12px;"><b></b> </div>`;
+            }
+
+            document.getElementById('texto-dinamico').innerHTML = htmlTexto;
+            document.getElementById('lista-itens').innerHTML = htmlItens;
+
+            document.getElementById('conteudo-despacho').style.display = 'block';
+            document.getElementById('conteudo-cdo').style.display = 'none';
+            document.getElementById('documento-preview').style.display = 'block';
+            document.getElementById('btnCopyDespacho').style.display = 'block';
+            window.scrollTo({ top: document.getElementById('documento-preview').offsetTop, behavior: 'smooth' });
+        }
+
+        // GERAR CDO
+        function gerarCDO() {
+            // Validar se há naturezas adicionadas
+            if (naturezasDespesa.length === 0) {
+                alert('Por favor, adicione pelo menos uma natureza de despesa antes de gerar o CDO.');
+                return;
+            }
+
+            const total = calcularTotal();
+            const totalFormatado = formatarMoeda(total);
+
+            // Gerar linhas da tabela de naturezas
+            let linhasTabela = '';
+            naturezasDespesa.forEach(nat => {
+                linhasTabela += `
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #000;">${nat.descricao}</td>
+                        <td style="padding: 10px; border: 1px solid #000; text-align: right;">${formatarMoeda(nat.valor)}</td>
+                    </tr>
+                `;
+            });
+
+            const html = `
+                <div style="margin-bottom: 2px;"><b>Unidade Administrativa:</b> ${document.getElementById('cdo-unidade').value}</div>
+                <div style="margin-bottom: 25px;"><b>Processo:</b> ${document.getElementById('cdo-proc-topo').value}</div>
+                
+                <p style="text-align: justify; line-height: 1.6; margin-bottom: 25px;">
+                    Visando subsidiar a execução de atividades concernentes ao Macroprocesso <b>${document.getElementById('cdo-macro').value}</b> Processo <b>${document.getElementById('cdo-proc-desc').value}</b> gerido por <b>${document.getElementById('cdo-setor').value}</b> programada no plano de atividades do Instituto para ${document.getElementById('cdo-ano').value}, certificamos a disponibilidade orçamentária abaixo detalhada com o reforço de empenho para o objetivo de atender à despesa com a finalidade de <b>${document.getElementById('cdo-finalidade').value}</b>, no valor total de <b>R$ ${totalFormatado}</b>.
+                </p>
+
+                <div style="font-weight: bold; margin-bottom: 10px;">Detalhes Orçamentários:</div>
+                <ul style="list-style-type: disc; margin-left: 20px; margin-bottom: 25px;">
+                    <li><b>UG / UGR:</b> ${document.getElementById('cdo-ug').value}</li>
+                    <li><b>Origem de Recursos SUAP:</b> ${document.getElementById('cdo-origem').value}</li>
+                    <li><b>PTRES:</b> ${document.getElementById('cdo-ptres').value}</li>
+                    <li><b>PI:</b> ${document.getElementById('cdo-pi').value}</li>
+                    <li><b>Grupo de Natureza de Despesa (GND):</b> ${document.getElementById('cdo-gnd').value}</li>
+                    <li><b>Fonte:</b> ${document.getElementById('cdo-fonte').value}</li>
+                    <li><b>Valor:</b> R$ ${totalFormatado}</li>
+                </ul>
+
+                <div style="font-weight: bold; margin-bottom: 10px;">Naturezas de despesas:</div>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 10px; border: 1px solid #000;">
+                    <thead>
+                        <tr style="background-color: #f2f2f2; text-align: left;">
+                            <th style="padding: 10px; border: 1px solid #000; font-size: 10pt;">Natureza de despesa</th>
+                            <th style="padding: 10px; border: 1px solid #000; text-align: right; font-size: 10pt;">Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${linhasTabela}
+                        <tr style="font-weight: bold; background-color: #f9f9f9;">
+                            <td style="padding: 10px; border: 1px solid #000;">Total</td>
+                            <td style="padding: 10px; border: 1px solid #000; text-align: right;">R$ ${totalFormatado}</td>
+                        </tr>
+                    </tbody>
+                </table>`;
+
+            document.getElementById('conteudo-cdo').innerHTML = html;
+            document.getElementById('conteudo-despacho').style.display = 'none';
+            document.getElementById('conteudo-cdo').style.display = 'block';
+            document.getElementById('documento-preview').style.display = 'block';
+            document.getElementById('btnCopyCDO').style.display = 'block';
+            window.scrollTo({ top: document.getElementById('documento-preview').offsetTop, behavior: 'smooth' });
+        }
+
+        // COPIAR TEXTO
+        async function copiarTexto(idArea, botao) {
+            const elemento = document.getElementById(idArea);
+            try {
+                const blob = new Blob([elemento.innerHTML], { type: "text/html" });
+                const data = [new ClipboardItem({ "text/html": blob })];
+                await navigator.clipboard.write(data);
+
+                const original = botao.innerText;
+                botao.innerText = "✓ COPIADO!";
+                botao.style.backgroundColor = "#27ae60";
+                setTimeout(() => {
+                    botao.innerText = original;
+                    botao.style.backgroundColor = "#f39c12";
+                }, 2000);
+            } catch (err) {
+                const range = document.createRange();
+                range.selectNode(elemento);
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+                document.execCommand('copy');
+                window.getSelection().removeAllRanges();
+                alert('Copiado com sucesso!');
+            }
+        }
+    </script>
+</body>
+
+</html>
