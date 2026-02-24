@@ -243,9 +243,21 @@
                 <option value="projeto">Projeto de Pesquisa / Extensão (Alunos)</option>
             </select>
         </div>
-        <div id="campo-projeto" class="form-group" style="display:none;">
-            <label>Nome do Projeto:</label>
-            <textarea id="nomeProjeto" rows="2"></textarea>
+        <div id="campo-projeto" style="display:none;">
+            <div class="row">
+                <div class="form-group">
+                    <label>Ano:</label>
+                    <input type="text" id="anoProjeto" value="2024">
+                </div>
+                <div class="form-group">
+                    <label>Identificação do Edital:</label>
+                    <input type="text" id="editalProjeto" value="10/2024-PROEX/IFRN">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Nome do Projeto:</label>
+                <textarea id="nomeProjeto" rows="2"></textarea>
+            </div>
         </div>
         <div id="campo-contrato">
             <div class="form-group">
@@ -306,9 +318,9 @@
         <div class="row">
             <div class="form-group"><label>Gerido por:</label><input type="text" id="cdo-setor"
                     value="PROAD - PRÓ-REITORIA DE ADMINISTRAÇÃO"></div>
-            <div class="form-group"><label>Ano Atividades:</label><input type="text" id="cdo-ano" value="2026"></div>
+            <div class="form-group"><label>Ano Atividades:</label><input type="text" id="cdo-ano" value="2025"></div>
         </div>
-        <div class="form-group"><label>Finalidade:</label><input type="text" id="cdo-finalidade">
+        <div class="form-group"><label>Finalidade (Ex: Custeio Mercatto):</label><input type="text" id="cdo-finalidade">
         </div>
 
         <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
@@ -353,7 +365,7 @@
                 CDO</button>
             <button class="action-btn btn-reset" onclick="window.location.reload()">LIMPAR</button>
             <button class="action-btn" style="background-color: #6f42c1;"
-                onclick="window.open('https://suap.ifrn.edu.br/documento_eletronico/clonar_documento/1026807/', '_blank')">CLONAR
+                onclick="window.open('https://suap.ifrn.edu.br/documento_eletronico/clonar_documento/1016427/', '_blank')">CLONAR
                 CDO (SUAP)</button>
         </div>
     </div>
@@ -653,7 +665,9 @@
                 htmlTexto = `Considerando a plena regularidade dos documentos apresentados ${textoTipo} para este <i>campus</i> Currais Novos, (Processo nº <b>${processo}</b>), <b>AUTORIZO</b> a liquidação da despesa no valor de <b>R$ ${valor}</b> referente ao empenho <b>${empenho}</b>, em favor da empresa <b>${favorecido}</b>`;
                 htmlItens = ``;
             } else {
-                htmlTexto = `Considerando a regularidade da documentação e a comprovação da execução das atividades pelos bolsistas do projeto <b>"${document.getElementById('nomeProjeto').value}"</b>, aprovado no Edital nº <b>10/2024-PROEX/IFRN</b> (Processo nº <b>${processo}</b>), <b>AUTORIZO</b> a liquidação da despesa no valor de <b>R$ ${valor}</b>.`;
+                //const anoProjeto = document.getElementById('anoProjeto').value;
+                const editalProjeto = document.getElementById('editalProjeto').value.toUpperCase();
+                htmlTexto = `Considerando a regularidade da documentação e a comprovação da execução das atividades pelo(s) bolsista(s) <b>${favorecido}</b> do projeto <b>"${document.getElementById('nomeProjeto').value}"</b>, aprovado no Edital nº <b>${editalProjeto}</b> (Processo nº <b>${processo}</b>), <b>AUTORIZO</b> a liquidação da despesa no valor de <b>R$ ${valor}</b>.`;
                 htmlItens = `<div style="margin-bottom: 12px;"><b>Empenho(s):</b> <span style="${estiloRed}">${empenho}</span></div>
                     <div style="margin-bottom: 12px;"><b></b> </div>`;
             }
