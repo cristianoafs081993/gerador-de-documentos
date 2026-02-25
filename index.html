@@ -10,20 +10,34 @@
             background-color: #e9ecef;
             padding: 20px;
             display: flex;
+            flex-direction: row;
+            /* Modificado para layout lateral */
+            justify-content: center;
+            /* Centraliza cartões horizontalmente */
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .sidebar {
+            width: 250px;
+            flex-shrink: 0;
+            display: flex;
             flex-direction: column;
-            align-items: center;
+            gap: 15px;
+            position: sticky;
+            top: 20px;
         }
 
         .nav-container {
             display: flex;
+            flex-direction: column;
+            /* Botões agora empilhados na lateral */
             gap: 10px;
-            margin-bottom: 20px;
             width: 100%;
-            max-width: 800px;
         }
 
         .nav-btn {
-            flex: 1;
+            width: 100%;
             padding: 15px;
             border: none;
             border-radius: 8px;
@@ -32,12 +46,21 @@
             background: #6c757d;
             color: white;
             transition: 0.3s;
-            font-size: 16px;
+            font-size: 15px;
         }
 
         .nav-btn.active {
             background: #28a745;
             box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 100%;
+            max-width: 800px;
         }
 
         .form-container {
@@ -46,10 +69,10 @@
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 800px;
             margin-bottom: 40px;
             border-top: 5px solid #28a745;
             display: none;
+            box-sizing: border-box;
         }
 
         .form-container.active {
@@ -194,14 +217,100 @@
             font-size: 16px;
         }
 
+        /* ESTILOS DO MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 0;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 25cm;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .modal-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .close-modal {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close-modal:hover,
+        .close-modal:focus {
+            color: black;
+            text-decoration: none;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #e9ecef;
+            display: flex;
+            justify-content: center;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            border-radius: 0 0 8px 8px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
         #documento-preview {
             background: white;
             width: 21cm;
-            min-height: 20cm;
+            min-height: 29.7cm;
+            /* A4 format */
             padding: 2.5cm;
-            margin: auto;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-            display: none;
+            display: block;
+            /* Vísivel por padrão dentro do modal */
+            box-sizing: border-box;
         }
 
         @media print {
@@ -212,185 +321,390 @@
 
             .nav-container,
             .form-container,
-            .btn-group {
+            .btn-group,
+            .pipeline-container {
                 display: none !important;
+            }
+
+            /* Ao imprimir, esconde o modal background e ajusta o preview */
+            .modal {
+                position: static;
+                display: block !important;
+                background-color: transparent;
+                backdrop-filter: none;
+            }
+
+            .modal-content {
+                margin: 0;
+                width: 100%;
+                max-width: 100%;
+                border: none;
+                box-shadow: none;
+                max-height: none;
+            }
+
+            .modal-header,
+            .modal-footer {
+                display: none !important;
+            }
+
+            .modal-body {
+                padding: 0;
+                background-color: transparent;
             }
 
             #documento-preview {
                 display: block !important;
                 box-shadow: none;
                 width: 100%;
-                padding: 1cm;
+                padding: 0cm;
+                /* Adjusted for better print */
+                min-height: auto;
             }
+        }
+
+        /* ESTILOS DA PIPELINE (ETAPAS) */
+        .pipeline-container {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 20px;
+            background: transparent;
+            padding: 0;
+            box-shadow: none;
+            box-sizing: border-box;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+            z-index: 1;
+            opacity: 0.5;
+            transition: 0.3s;
+        }
+
+        .step.active,
+        .step.completed {
+            opacity: 1;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #6c757d;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 8px;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #6c757d;
+            transition: 0.3s;
+            z-index: 2;
+            position: relative;
+        }
+
+        .step.active .step-circle {
+            background-color: #007bff;
+            box-shadow: 0 0 0 2px #007bff;
+        }
+
+        .step.completed .step-circle {
+            background-color: #28a745;
+            box-shadow: 0 0 0 2px #28a745;
+        }
+
+        .step-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #495057;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .step.active .step-label {
+            color: #007bff;
+        }
+
+        .step.completed .step-label {
+            color: #28a745;
+        }
+
+        .step-line {
+            height: 4px;
+            background-color: #e9ecef;
+            flex: 2;
+            margin-top: 20px;
+            transition: 0.3s;
+            z-index: 0;
+        }
+
+        .step-line.active {
+            background-color: #28a745;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="nav-container">
-        <button id="btn-nav-despacho" class="nav-btn active" onclick="switchTab('despacho')">GERADOR DE
-            DESPACHO</button>
-        <button id="btn-nav-cdo" class="nav-btn" onclick="switchTab('cdo')">GERADOR DE CDO</button>
-    </div>
-
-    <div id="container-despacho" class="form-container active">
-        <h2>Gerador de Despacho 4.5</h2>
-        <div class="form-group">
-            <label>Finalidade do Despacho:</label>
-            <select id="finalidade" onchange="alternarCampos()">
-                <option value="contrato">Contrato ou Aquisição Comum</option>
-                <option value="projeto">Projeto de Pesquisa / Extensão (Alunos)</option>
-            </select>
-        </div>
-        <div id="campo-projeto" style="display:none;">
-            <div class="row">
-                <div class="form-group">
-                    <label>Ano:</label>
-                    <input type="text" id="anoProjeto" value="2026">
-                </div>
-                <div class="form-group">
-                    <label>Identificação do Edital:</label>
-                    <input type="text" id="editalProjeto" value="10/2026-PROEX/IFRN">
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Nome do Projeto:</label>
-                <textarea id="nomeProjeto" rows="2"></textarea>
-            </div>
-        </div>
-        <div id="campo-contrato">
-            <div class="form-group">
-                <label>Tipo:</label>
-                <select id="tipo">
-                    <option value="dos serviços de">Serviço</option>
-                    <option value="da aquisição de">Aquisição</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Descrição Detalhada:</label>
-                <textarea id="descricao" rows="2"></textarea>
-            </div>
-        </div>
-        <div class="form-group">
-            <label id="label-favorecido">Favorecido:</label>
-            <input type="text" id="favorecido">
-        </div>
-        <div class="row">
-            <div class="form-group"><label>Processo nº:</label><input type="text" id="processo"></div>
-            <div class="form-group"><label>Valor (R$):</label><input type="text" id="valor"></div>
-        </div>
-        <div class="form-group">
-            <label>Número do Empenho:</label>
-            <input type="text" id="empenho">
-        </div>
-        <div class="btn-group">
-            <button class="action-btn btn-gerar" onclick="gerarDespacho()">GERAR DESPACHO</button>
-            <button id="btnCopyDespacho" class="action-btn btn-copy"
-                onclick="copiarTexto('conteudo-despacho', this)">COPIAR TEXTO</button>
-            <button class="action-btn btn-reset" onclick="window.location.reload()">LIMPAR</button>
-            <button class="action-btn btn-clonar"
-                onclick="window.open('https://suap.ifrn.edu.br/documento_eletronico/clonar_documento/1026154/', '_blank')">CLONAR
-                (SUAP)</button>
+    <div class="sidebar">
+        <div class="nav-container">
+            <button id="btn-nav-despacho" class="nav-btn active" onclick="switchTab('despacho')">GERADOR DE
+                DESPACHO</button>
+            <button id="btn-nav-cdo" class="nav-btn" onclick="switchTab('cdo')">GERADOR DE CDO</button>
         </div>
     </div>
 
-    <div id="container-cdo" class="form-container">
-        <h2>Certificado de Dotação Orçamentária</h2>
-        <div class="row">
-            <div class="form-group"><label>Unidade Administrativa:</label><input type="text" id="cdo-unidade"
-                    value="DG/CN - DIREÇÃO-GERAL DO CAMPUS CURRAIS NOVOS"></div>
-            <div class="form-group"><label>Processo nº:</label><input type="text" id="cdo-proc-topo"
-                    placeholder="23035.XXXXXX/2026-XX"></div>
-        </div>
-        <div class="row">
-            <div class="form-group"><label>Macroprocesso:</label>
-                <select id="cdo-macro" onchange="atualizarProcessos()">
-                    <option value="">Selecione...</option>
+    <div class="main-content">
+        <div id="container-despacho" class="form-container active">
+            <h2>Gerador de Despacho 4.5</h2>
+            <div class="form-group">
+                <label>Finalidade do Despacho:</label>
+                <select id="finalidade" onchange="alternarCampos()">
+                    <option value="contrato">Contrato ou Aquisição Comum</option>
+                    <option value="projeto">Projeto de Pesquisa / Extensão (Alunos)</option>
                 </select>
             </div>
-            <div class="form-group"><label>Processo (Descrição):</label>
-                <select id="cdo-proc-desc">
-                    <option value="">Selecione o macroprocesso primeiro</option>
-                </select>
-            </div>
-        </div>
-        <div class="row">
-            <div class="form-group"><label>Gerido por:</label><input type="text" id="cdo-setor"
-                    value="PROAD - PRÓ-REITORIA DE ADMINISTRAÇÃO"></div>
-            <div class="form-group"><label>Ano Atividades:</label><input type="text" id="cdo-ano" value="2026"></div>
-        </div>
-        <div class="form-group"><label>Finalidade (Ex: Custeio Mercatto):</label><input type="text" id="cdo-finalidade">
-        </div>
-
-        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
-            <div class="row">
-                <div class="form-group"><label>UG / UGR:</label><input type="text" id="cdo-ug" value="158366/151606">
-                </div>
-                <div class="form-group"><label>Origem Recurso SUAP:</label><input type="text" id="cdo-origem"></div>
-            </div>
-            <div class="row">
-                <div class="form-group"><label>PTRES:</label><input type="text" id="cdo-ptres"></div>
-                <div class="form-group"><label>PI:</label><input type="text" id="cdo-pi"></div>
-            </div>
-            <div class="row">
-                <div class="form-group"><label>GND:</label><input type="text" id="cdo-gnd"
-                        value="3 - Outras Despesas Correntes"></div>
-                <div class="form-group"><label>Fonte:</label><input type="text" id="cdo-fonte" value="1000000000"></div>
-            </div>
-
-            <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #ddd;">
-                <h3 style="margin-top: 0; color: #155724; font-size: 16px;">Naturezas de Despesa</h3>
+            <div id="campo-projeto" style="display:none;">
                 <div class="row">
-                    <div class="form-group" style="flex: 2;">
-                        <label>Natureza de Despesa (Ex: 339034 - DIARIAS):</label>
-                        <input type="text" id="cdo-nat-desc-input">
+                    <div class="form-group">
+                        <label>Ano:</label>
+                        <input type="text" id="anoProjeto" value="2026">
                     </div>
                     <div class="form-group">
-                        <label>Valor (R$):</label>
-                        <input type="text" id="cdo-nat-valor-input" placeholder="0.00">
+                        <label>Identificação do Edital:</label>
+                        <input type="text" id="editalProjeto" value="10/2026-PROEX/IFRN">
                     </div>
                 </div>
-                <button type="button" class="action-btn"
-                    style="background-color: #17a2b8; width: 100%; margin-bottom: 15px;" onclick="adicionarNatureza()">+
-                    ADICIONAR NATUREZA DE DESPESA</button>
-
-                <div id="lista-naturezas" style="margin-top: 15px;"></div>
+                <div class="form-group">
+                    <label>Nome do Projeto:</label>
+                    <textarea id="nomeProjeto" rows="2"></textarea>
+                </div>
+            </div>
+            <div id="campo-contrato">
+                <div class="form-group">
+                    <label>Tipo:</label>
+                    <select id="tipo">
+                        <option value="dos serviços de">Serviço</option>
+                        <option value="da aquisição de">Aquisição</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Descrição Detalhada:</label>
+                    <textarea id="descricao" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <label id="label-favorecido">Favorecido:</label>
+                <input type="text" id="favorecido">
+            </div>
+            <div class="row">
+                <div class="form-group"><label>Processo nº:</label><input type="text" id="processo"></div>
+                <div class="form-group"><label>Valor (R$):</label><input type="text" id="valor"></div>
+            </div>
+            <div class="form-group">
+                <label>Número do Empenho:</label>
+                <input type="text" id="empenho">
+            </div>
+            <div class="btn-group">
+                <button class="action-btn btn-gerar" onclick="gerarDespacho()">GERAR DESPACHO</button>
+                <button class="action-btn btn-reset" onclick="window.location.reload()">LIMPAR</button>
             </div>
         </div>
 
-        <div class="btn-group">
-            <button class="action-btn btn-gerar" onclick="gerarCDO()">GERAR CDO</button>
-            <button id="btnCopyCDO" class="action-btn btn-copy" onclick="copiarTexto('conteudo-cdo', this)">COPIAR
-                CDO</button>
-            <button class="action-btn btn-reset" onclick="window.location.reload()">LIMPAR</button>
-            <button class="action-btn" style="background-color: #6f42c1;"
-                onclick="window.open('https://suap.ifrn.edu.br/documento_eletronico/clonar_documento/1016427/', '_blank')">CLONAR
-                CDO (SUAP)</button>
+        <div id="container-cdo" class="form-container">
+            <h2>Certificado de Dotação Orçamentária</h2>
+            <div class="row">
+                <div class="form-group"><label>Unidade Administrativa:</label><input type="text" id="cdo-unidade"
+                        value="DG/CN - DIREÇÃO-GERAL DO CAMPUS CURRAIS NOVOS"></div>
+                <div class="form-group"><label>Processo nº:</label><input type="text" id="cdo-proc-topo"
+                        placeholder="23035.XXXXXX/2026-XX"></div>
+            </div>
+            <div class="row">
+                <div class="form-group"><label>Macroprocesso:</label>
+                    <select id="cdo-macro" onchange="atualizarProcessos()">
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Processo (Descrição):</label>
+                    <select id="cdo-proc-desc">
+                        <option value="">Selecione o macroprocesso primeiro</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group"><label>Gerido por:</label><input type="text" id="cdo-setor"
+                        value="PROAD - PRÓ-REITORIA DE ADMINISTRAÇÃO"></div>
+                <div class="form-group"><label>Ano Atividades:</label><input type="text" id="cdo-ano" value="2026">
+                </div>
+            </div>
+            <div class="form-group"><label>Finalidade (Ex: Custeio Mercatto):</label><input type="text"
+                    id="cdo-finalidade">
+            </div>
+
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
+                <div class="row">
+                    <div class="form-group"><label>UG / UGR:</label><input type="text" id="cdo-ug"
+                            value="158366/151606">
+                    </div>
+                    <div class="form-group"><label>Origem Recurso SUAP:</label><input type="text" id="cdo-origem"></div>
+                </div>
+                <div class="row">
+                    <div class="form-group"><label>PTRES:</label><input type="text" id="cdo-ptres"></div>
+                    <div class="form-group"><label>PI:</label><input type="text" id="cdo-pi"></div>
+                </div>
+                <div class="row">
+                    <div class="form-group"><label>GND:</label><input type="text" id="cdo-gnd"
+                            value="3 - Outras Despesas Correntes"></div>
+                    <div class="form-group"><label>Fonte:</label><input type="text" id="cdo-fonte" value="1000000000">
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #ddd;">
+                    <h3 style="margin-top: 0; color: #155724; font-size: 16px;">Naturezas de Despesa</h3>
+                    <div class="row">
+                        <div class="form-group" style="flex: 2;">
+                            <label>Natureza de Despesa (Ex: 339034 - DIARIAS):</label>
+                            <input type="text" id="cdo-nat-desc-input">
+                        </div>
+                        <div class="form-group">
+                            <label>Valor (R$):</label>
+                            <input type="text" id="cdo-nat-valor-input" placeholder="0.00">
+                        </div>
+                    </div>
+                    <button type="button" class="action-btn"
+                        style="background-color: #17a2b8; width: 100%; margin-bottom: 15px;"
+                        onclick="adicionarNatureza()">+
+                        ADICIONAR NATUREZA DE DESPESA</button>
+
+                    <div id="lista-naturezas" style="margin-top: 15px;"></div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="action-btn btn-gerar" onclick="gerarCDO()">GERAR CDO</button>
+                <button class="action-btn btn-reset" onclick="window.location.reload()">LIMPAR</button>
+            </div>
         </div>
     </div>
 
-    <div id="documento-preview">
-        <div id="conteudo-despacho"
-            style="display:none; font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5; text-align: justify; color: black;">
-            <div>À Coordenação de Finanças e Contratos do <i>Campus</i> Currais Novos</div>
-            <div style="font-weight: bold; margin-top: 30px;">Assunto: Autorização para Liquidação da Despesa</div>
-            <div id="texto-dinamico" style="text-indent: 2.5cm; margin-top: 30px; margin-bottom: 25px;"></div>
-            <div id="lista-itens"></div>
-            <div style="margin-top: 25px;">Na sequência, encaminhe-se o processo à Direção-Geral para análise e
-                posterior autorização do pagamento, em conformidade com o cronograma e a disponibilidade orçamentária
-                desta unidade.
+    <!-- MODAL PARA O DOCUMENTO GERADO -->
+    <div id="modalDocumento" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-header-top">
+                    <h3>Documento Gerado</h3>
+                    <span class="close-modal" onclick="fecharModal()">&times;</span>
+                </div>
+                <!-- PIPELINE VISUAL DENTRO DO MODAL -->
+                <div class="pipeline-container" id="modal-pipeline">
+                    <div class="step active" id="step-1">
+                        <div class="step-circle" id="circle-1">1</div>
+                        <div class="step-label">1. Preencher<br>Dados</div>
+                    </div>
+                    <div class="step-line" id="line-1"></div>
+                    <div class="step" id="step-2">
+                        <div class="step-circle" id="circle-2">2</div>
+                        <div class="step-label">2. Gerar<br>Documento</div>
+                    </div>
+                    <div class="step-line" id="line-2"></div>
+                    <div class="step" id="step-3">
+                        <div class="step-circle" id="circle-3">3</div>
+                        <div class="step-label">3. Copiar e<br>Finalizar</div>
+                    </div>
+                </div>
             </div>
-            <div style="margin-top: 40px;">Atenciosamente,</div>
-        </div>
+            <div class="modal-body">
+                <div id="documento-preview">
+                    <!-- Conteúdo original copiado para dentro do preview -->
+                    <div id="conteudo-despacho"
+                        style="display:none; font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5; text-align: justify; color: black;">
+                        <div>À Coordenação de Finanças e Contratos do <i>Campus</i> Currais Novos</div>
+                        <div style="font-weight: bold; margin-top: 30px;">Assunto: Autorização para Liquidação da
+                            Despesa</div>
+                        <div id="texto-dinamico" style="text-indent: 2.5cm; margin-top: 30px; margin-bottom: 25px;">
+                        </div>
+                        <div id="lista-itens"></div>
+                        <div style="margin-top: 25px;">Na sequência, encaminhe-se o processo à Direção-Geral para
+                            análise e
+                            posterior autorização do pagamento, em conformidade com o cronograma e a disponibilidade
+                            orçamentária
+                            desta unidade.
+                        </div>
+                        <div style="margin-top: 40px;">Atenciosamente,</div>
+                    </div>
 
-        <div id="conteudo-cdo"
-            style="display:none; font-family: 'Times New Roman', Times, serif; font-size: 11pt; color: black;"></div>
+                    <div id="conteudo-cdo"
+                        style="display:none; font-family: 'Times New Roman', Times, serif; font-size: 11pt; color: black;">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnClonarSUAP" class="action-btn btn-clonar" style="display:none;"
+                    onclick="clonarDocumento()"><i class="fas fa-clone"></i> CLONAR NO SUAP</button>
+                <div style="flex:1;"></div>
+                <button id="btnCopyCDO" class="action-btn btn-copy" style="display:none;"
+                    onclick="copiarTexto('conteudo-cdo', this)"><i class="fas fa-copy"></i> COPIAR CDO</button>
+                <button id="btnCopyDespacho" class="action-btn btn-copy" style="display:none;"
+                    onclick="copiarTexto('conteudo-despacho', this)"><i class="fas fa-copy"></i> COPIAR
+                    DESPACHO</button>
+                <button class="action-btn" style="background-color: #6c757d;" onclick="fecharModal()">FECHAR</button>
+            </div>
+        </div>
     </div>
 
     <script>
         // ARRAY PARA ARMAZENAR NATUREZAS DE DESPESA
         let naturezasDespesa = [];
+
+        // FUNÇÃO DE PIPELINE (ETAPAS)
+        function atualizarEtapa(etapa) {
+            // Resetar tudo
+            for (let i = 1; i <= 3; i++) {
+                const stepEl = document.getElementById(`step-${i}`);
+                const circleEl = document.getElementById(`circle-${i}`);
+                if (stepEl && circleEl) {
+                    stepEl.classList.remove('active', 'completed');
+                    circleEl.innerHTML = i;
+                }
+
+                if (i < 3) {
+                    const lineEl = document.getElementById(`line-${i}`);
+                    if (lineEl) lineEl.classList.remove('active');
+                }
+            }
+
+            // Aplicar classes para o estado atual
+            for (let i = 1; i <= 3; i++) {
+                const stepEl = document.getElementById(`step-${i}`);
+                const circleEl = document.getElementById(`circle-${i}`);
+
+                if (i < etapa) {
+                    if (stepEl) stepEl.classList.add('completed');
+                    if (circleEl) circleEl.innerHTML = '✓';
+                    if (i < 3) {
+                        const lineEl = document.getElementById(`line-${i}`);
+                        if (lineEl) lineEl.classList.add('active');
+                    }
+                } else if (i === etapa) {
+                    if (stepEl) stepEl.classList.add('active');
+                }
+            }
+        }
+
+        // Monitorar alterações nos campos para voltar para a etapa 1
+        window.addEventListener('input', function (e) {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') {
+                atualizarEtapa(1);
+            }
+        });
 
         // ADICIONAR NATUREZA DE DESPESA
         function adicionarNatureza() {
@@ -417,12 +731,14 @@
             valorInput.value = '';
 
             atualizarListaNaturezas();
+            atualizarEtapa(1);
         }
 
         // REMOVER NATUREZA DE DESPESA
         function removerNatureza(index) {
             naturezasDespesa.splice(index, 1);
             atualizarListaNaturezas();
+            atualizarEtapa(1);
         }
 
         // ATUALIZAR VISUALIZAÇÃO DA LISTA DE NATUREZAS
@@ -627,7 +943,26 @@
             document.getElementById('btn-nav-despacho').classList.toggle('active', tab === 'despacho');
             document.getElementById('btn-nav-cdo').classList.toggle('active', tab === 'cdo');
 
-            document.getElementById('documento-preview').style.display = 'none';
+            atualizarEtapa(1);
+        }
+
+        // ABRIR/FECHAR MODAL
+        function abrirModal() {
+            document.getElementById('modalDocumento').style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Impede o scroll de fundo
+        }
+
+        function fecharModal() {
+            document.getElementById('modalDocumento').style.display = 'none';
+            document.body.style.overflow = 'auto'; // Restaura o scroll
+        }
+
+        // Fechar modal ao clicar fora do conteúdo
+        window.onclick = function (event) {
+            const modal = document.getElementById('modalDocumento');
+            if (event.target == modal) {
+                fecharModal();
+            }
         }
 
         // ALTERNAR CAMPOS DESPACHO
@@ -677,9 +1012,14 @@
 
             document.getElementById('conteudo-despacho').style.display = 'block';
             document.getElementById('conteudo-cdo').style.display = 'none';
-            document.getElementById('documento-preview').style.display = 'block';
             document.getElementById('btnCopyDespacho').style.display = 'block';
-            window.scrollTo({ top: document.getElementById('documento-preview').offsetTop, behavior: 'smooth' });
+            document.getElementById('btnCopyCDO').style.display = 'none';
+            document.getElementById('btnClonarSUAP').style.display = 'block';
+            document.getElementById('btnClonarSUAP').onclick = function () {
+                window.open('https://suap.ifrn.edu.br/documento_eletronico/clonar_documento/1026154/', '_blank');
+            };
+            atualizarEtapa(2);
+            abrirModal();
         }
 
         // GERAR CDO
@@ -743,9 +1083,15 @@
             document.getElementById('conteudo-cdo').innerHTML = html;
             document.getElementById('conteudo-despacho').style.display = 'none';
             document.getElementById('conteudo-cdo').style.display = 'block';
-            document.getElementById('documento-preview').style.display = 'block';
             document.getElementById('btnCopyCDO').style.display = 'block';
-            window.scrollTo({ top: document.getElementById('documento-preview').offsetTop, behavior: 'smooth' });
+            document.getElementById('btnCopyDespacho').style.display = 'none';
+            document.getElementById('btnClonarSUAP').style.display = 'block';
+            document.getElementById('btnClonarSUAP').style.backgroundColor = '#6f42c1'; // cor do CDO
+            document.getElementById('btnClonarSUAP').onclick = function () {
+                window.open('https://suap.ifrn.edu.br/documento_eletronico/clonar_documento/1016427/', '_blank');
+            };
+            atualizarEtapa(2);
+            abrirModal();
         }
 
         // COPIAR TEXTO
@@ -756,13 +1102,7 @@
                 const data = [new ClipboardItem({ "text/html": blob })];
                 await navigator.clipboard.write(data);
 
-                const original = botao.innerText;
-                botao.innerText = "✓ COPIADO!";
-                botao.style.backgroundColor = "#27ae60";
-                setTimeout(() => {
-                    botao.innerText = original;
-                    botao.style.backgroundColor = "#f39c12";
-                }, 2000);
+                feebackCopia(botao);
             } catch (err) {
                 const range = document.createRange();
                 range.selectNode(elemento);
@@ -770,12 +1110,32 @@
                 window.getSelection().addRange(range);
                 document.execCommand('copy');
                 window.getSelection().removeAllRanges();
+
+                feebackCopia(botao);
                 alert('Copiado com sucesso!');
             }
+        }
+
+        function feebackCopia(botao) {
+            // Se estivermos mudando o estado visual (etapa 3 completa), mantemos ativo:
+            atualizarEtapa(3);
+
+            // Marca a etapa 3 permanentemente usando classes apropriadas
+            document.getElementById('step-3').classList.add('completed');
+            const step3Circle = document.getElementById('circle-3');
+            if (step3Circle) step3Circle.innerHTML = '✓';
+
+            const original = botao.innerText;
+            botao.innerText = "✓ COPIADO!";
+            botao.style.backgroundColor = "#27ae60";
+
+            setTimeout(() => {
+                botao.innerText = original;
+                botao.style.backgroundColor = "#f39c12"; // volta o botão ao laranja
+            }, 2000);
         }
     </script>
 </body>
 
 
 </html>
-
