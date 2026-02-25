@@ -572,11 +572,12 @@
                     <div class="row">
                         <div class="form-group" style="flex: 2;">
                             <label>Natureza de Despesa (Ex: 339034 - DIARIAS):</label>
-                            <input type="text" id="cdo-nat-desc-input">
+                            <input type="text" id="cdo-nat-desc-input"
+                                value="339039 - OUTROS SERVICOS DE TERCEIROS - PESSOA JURIDICA">
                         </div>
                         <div class="form-group">
                             <label>Valor (R$):</label>
-                            <input type="text" id="cdo-nat-valor-input" placeholder="0.00">
+                            <input type="text" id="cdo-nat-valor-input" placeholder="0.00" value="0.00">
                         </div>
                     </div>
                     <button type="button" class="action-btn"
@@ -622,7 +623,7 @@
                 </div>
             </div>
             <div class="modal-body">
-                <div id="documento-preview">
+                <div id="documento-preview" contenteditable="true" style="outline: none;">
                     <!-- Conteúdo original copiado para dentro do preview -->
                     <div id="conteudo-despacho"
                         style="display:none; font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5; text-align: justify; color: black;">
@@ -693,7 +694,7 @@
                         const lineEl = document.getElementById(`line-${i}`);
                         if (lineEl) lineEl.classList.add('active');
                     }
-                } else if (i === etapa) {
+                } else if (i === etapa && i <= 3) {
                     if (stepEl) stepEl.classList.add('active');
                 }
             }
@@ -706,29 +707,22 @@
             }
         });
 
-        // ADICIONAR NATUREZA DE DESPESA
+        // ADICIONAR NATUREZA DE DESPESA (AGORA SERVE PARA A SEGUNDA, TERCEIRA...)
         function adicionarNatureza() {
-            const descInput = document.getElementById('cdo-nat-desc-input');
-            const valorInput = document.getElementById('cdo-nat-valor-input');
+            // Cria campos extras dinâmicos usando um prompt para simplificar
+            const descExtra = prompt("Digite a descrição da Nova Natureza de Despesa Extra:\n(Ex: 339030 - MATERIAL DE CONSUMO)");
+            if (!descExtra || descExtra.trim() === '') return;
 
-            const desc = descInput.value.trim();
-            const valor = valorInput.value.trim();
+            const valorExtraStr = prompt("Digite o valor para essa Natureza de Despesa Extra:\n(Use ponto ou vírgula. Ex: 1500,00)");
+            if (!valorExtraStr) return;
 
-            if (!desc || !valor) {
-                alert('Por favor, preencha a descrição e o valor da natureza de despesa.');
-                return;
-            }
-
-            const valorNum = parseFloat(valor.replace(',', '.'));
+            const valorNum = parseFloat(valorExtraStr.replace(',', '.'));
             if (isNaN(valorNum) || valorNum <= 0) {
-                alert('Por favor, insira um valor válido.');
+                alert('Por favor, insira um valor numérico válido.');
                 return;
             }
 
-            naturezasDespesa.push({ descricao: desc, valor: valorNum });
-
-            descInput.value = '';
-            valorInput.value = '';
+            naturezasDespesa.push({ descricao: descExtra.trim(), valor: valorNum });
 
             atualizarListaNaturezas();
             atualizarEtapa(1);
@@ -745,33 +739,46 @@
         function atualizarListaNaturezas() {
             const lista = document.getElementById('lista-naturezas');
 
+            let html = '';
+
             if (naturezasDespesa.length === 0) {
-                lista.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">Nenhuma natureza de despesa adicionada ainda.</p>';
-                return;
+                html += '<p style="color: #999; text-align: center; padding: 10px;">Nenhuma natureza extra adicionada.</p>';
+            } else {
+                naturezasDespesa.forEach((nat, index) => {
+                    html += `
+                        <div class="natureza-item">
+                            <div class="natureza-info">
+                                <div class="natureza-desc">${nat.descricao}</div>
+                                <div class="natureza-valor">R$ ${formatarMoeda(nat.valor)}</div>
+                            </div>
+                            <button class="btn-remover" onclick="removerNatureza(${index})">✕ REMOVER</button>
+                        </div>
+                    `;
+                });
             }
 
-            let html = '';
-            naturezasDespesa.forEach((nat, index) => {
-                html += `
-                    <div class="natureza-item">
-                        <div class="natureza-info">
-                            <div class="natureza-desc">${nat.descricao}</div>
-                            <div class="natureza-valor">R$ ${formatarMoeda(nat.valor)}</div>
-                        </div>
-                        <button class="btn-remover" onclick="removerNatureza(${index})">✕ REMOVER</button>
-                    </div>
-                `;
-            });
-
             const total = calcularTotal();
-            html += `<div class="total-naturezas">TOTAL: R$ ${formatarMoeda(total)}</div>`;
+            html += `<div class="total-naturezas">TOTAL PREVISTO: R$ ${formatarMoeda(total)}</div>`;
 
             lista.innerHTML = html;
         }
 
         // CALCULAR TOTAL
         function calcularTotal() {
-            return naturezasDespesa.reduce((sum, nat) => sum + nat.valor, 0);
+            // Pega o total do array
+            const totalArray = naturezasDespesa.reduce((sum, nat) => sum + nat.valor, 0);
+
+            // Soma com o valor que está no input principal da tela (se válido)
+            let baseValor = 0;
+            const inputElement = document.getElementById('cdo-nat-valor-input');
+            if (inputElement) {
+                const parsed = parseFloat(inputElement.value.trim().replace(',', '.'));
+                if (!isNaN(parsed) && parsed > 0) {
+                    baseValor = parsed;
+                }
+            }
+
+            return totalArray + baseValor;
         }
 
         // FORMATAR VALOR EM MOEDA
@@ -1018,28 +1025,41 @@
             document.getElementById('btnClonarSUAP').onclick = function () {
                 window.open('https://suap.ifrn.edu.br/documento_eletronico/clonar_documento/1026154/', '_blank');
             };
-            atualizarEtapa(2);
+            atualizarEtapa(3);
             abrirModal();
         }
 
         // GERAR CDO
         function gerarCDO() {
-            // Validar se há naturezas adicionadas
-            if (naturezasDespesa.length === 0) {
-                alert('Por favor, adicione pelo menos uma natureza de despesa antes de gerar o CDO.');
+            const descInput = document.getElementById('cdo-nat-desc-input').value.trim();
+            const valorInput = document.getElementById('cdo-nat-valor-input').value.trim();
+            const valorNum = parseFloat(valorInput.replace(',', '.'));
+
+            // Validar se a natureza principal está preenchida
+            if (!descInput || isNaN(valorNum) || valorNum <= 0) {
+                alert('Por favor, preencha corretamente a Natureza de Despesa principal e seu valor antes de gerar o CDO.');
                 return;
             }
 
-            const total = calcularTotal();
-            const totalFormatado = formatarMoeda(total);
+            // O total já é calculado somando a principal e as adicionais em calcularTotal()
+            const totalGeral = calcularTotal();
+            const totalFormatado = formatarMoeda(totalGeral);
 
             // Gerar linhas da tabela de naturezas
-            let linhasTabela = '';
+            // 1. Sempre insere a primeira (que está nos inputs fixos)
+            let linhasTabela = `
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #000;">${descInput}</td>
+                    <td style="padding: 10px; border: 1px solid #000; text-align: right;">R$ ${formatarMoeda(valorNum)}</td>
+                </tr>
+            `;
+
+            // 2. Insere as adicionais, se houver
             naturezasDespesa.forEach(nat => {
                 linhasTabela += `
                     <tr>
                         <td style="padding: 10px; border: 1px solid #000;">${nat.descricao}</td>
-                        <td style="padding: 10px; border: 1px solid #000; text-align: right;">${formatarMoeda(nat.valor)}</td>
+                        <td style="padding: 10px; border: 1px solid #000; text-align: right;">R$ ${formatarMoeda(nat.valor)}</td>
                     </tr>
                 `;
             });
@@ -1090,7 +1110,7 @@
             document.getElementById('btnClonarSUAP').onclick = function () {
                 window.open('https://suap.ifrn.edu.br/documento_eletronico/clonar_documento/1016427/', '_blank');
             };
-            atualizarEtapa(2);
+            atualizarEtapa(3);
             abrirModal();
         }
 
@@ -1118,7 +1138,7 @@
 
         function feebackCopia(botao) {
             // Se estivermos mudando o estado visual (etapa 3 completa), mantemos ativo:
-            atualizarEtapa(3);
+            atualizarEtapa(4);
 
             // Marca a etapa 3 permanentemente usando classes apropriadas
             document.getElementById('step-3').classList.add('completed');
